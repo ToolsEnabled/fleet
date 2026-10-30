@@ -140,7 +140,7 @@ function validateInputRequest(value) {
     if (request.schema !== undefined) invalid();
     text(request.url, 8192);
     const url = new URL(request.url);
-    if (url.username || url.password || !(url.protocol === 'https:' || url.protocol === 'http:' && ['localhost', 'host.example.invalid', '[::1]'].includes(url.hostname))) invalid();
+    if (url.username || url.password || !(url.protocol === 'https:' || url.protocol === 'http:' && ['localhost', '127.0.0.1', '[::1]'].includes(url.hostname))) invalid();
   } else invalid();
   return Object.freeze({ ...request, context });
 }

@@ -1738,7 +1738,7 @@
         "depth": 3,
         "control": "toggle",
         "default": false,
-        "consequence": "Off, nothing outside this app can press its buttons or read its screen. On, a program running on this computer under your account, such as an agent you run from a terminal or a test script, can drive this app: open its menus, press its buttons, read what is on screen, and run code inside it, through a control connection that only this computer can reach (address host.example.invalid, port 9223). It takes effect the next time the app starts, because the connection can only be opened while the app is starting. It is off when the product is installed: a copy someone else uses should not be drivable by other programs unless that person chose it.",
+        "consequence": "Off, nothing outside this app can press its buttons or read its screen. On, a program running on this computer under your account, such as an agent you run from a terminal or a test script, can drive this app: open its menus, press its buttons, read what is on screen, and run code inside it, through a control connection that only this computer can reach (address 127.0.0.1, port 9223). It takes effect the next time the app starts, because the connection can only be opened while the app is starting. It is off when the product is installed: a copy someone else uses should not be drivable by other programs unless that person chose it.",
         "capabilities": [
           "An agent outside the app can operate it for you and report the errors it finds, which is how this product's own development and testing drive it."
         ],

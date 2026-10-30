@@ -6,7 +6,7 @@ process.umask(0o077);
 // (adapters/openshell/HOST-OUTSIDE.md). On the machine that runs OpenShell:
 //
 //   toolsenabled-authority init [--audit]                           make the host's root; --audit turns the signed audit on
-//   toolsenabled-authority serve [--port 18795]                     serve MCP on 127' + '.0.0.1' + ' (foreground)
+//   toolsenabled-authority serve [--port 18795]                     serve MCP on 127.0.0.1 (foreground)
 //   toolsenabled-authority grant add <id> --actor AGENT_ID --tools a,b --token-file FILE
 //   toolsenabled-authority grant list | grant remove <id>
 //   toolsenabled-authority profile <id> --env-var NAME                 an OpenShell provider profile for the grant's token
@@ -284,10 +284,10 @@ function serve(root, args) {
   const http = server.createHostServer({ root, port, permissionSession });
   const pidFile = path.join(root, 'openshell-host', 'server.pid');
   return new Promise((resolve) => {
-    http.on('error', (error) => { process.stderr.write(`The ToolsEnabled host could not listen on 127' + '.0.0.1' + ':${port}: ${error.code || error.message}\n`); resolve(1); });
-    http.listen(port, 'host.example.invalid', () => {
+    http.on('error', (error) => { process.stderr.write(`The ToolsEnabled host could not listen on 127.0.0.1:${port}: ${error.code || error.message}\n`); resolve(1); });
+    http.listen(port, '127.0.0.1', () => {
       fs.writeFileSync(pidFile, String(process.pid), { mode: 0o600 });
-      out(`ToolsEnabled host serving MCP on http://127' + '.0.0.1' + ':${port}/mcp (root ${root}, level ${tier}).`);
+      out(`ToolsEnabled host serving MCP on http://127.0.0.1:${port}/mcp (root ${root}, level ${tier}).`);
       const stop = () => {
         http.close(() => { fs.rmSync(pidFile, { force: true }); resolve(0); });
         http.closeIdleConnections();

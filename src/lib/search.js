@@ -19,7 +19,7 @@ const workspaceBoundary = require('./workspace-boundary');
 const { isCredentialProtectedPath } = require('./providers/host-control');
 
 const DB_PATH = process.env.TOOLSENABLED_SEARCH_DB || rootPath('state', 'search-index.sqlite');
-const OLLAMA_HOST = '127' + '.0.0.1';
+const OLLAMA_HOST = '127.0.0.1';
 const OLLAMA_PORT = 11434;
 const DEFAULT_MODEL = 'nomic-embed-text';
 const LEXICAL_DIM = 256;

@@ -50,7 +50,7 @@ function parseOllamaEndpoint(endpoint) {
   let url;
   try { url = new URL(endpoint); } catch { throw invalid('The model endpoint setting is not a web address.'); }
   if (url.protocol !== 'http:' || url.username || url.password || url.search || url.hash || !['', '/'].includes(url.pathname)) {
-    throw invalid('The model endpoint must be a plain http address such as http://127' + '.0.0.1' + ':11434, with no path, query or credential.');
+    throw invalid('The model endpoint must be a plain http address such as http://127.0.0.1:11434, with no path, query or credential.');
   }
   return { host: url.hostname.replace(/^\[|\]$/g, ''), port: url.port ? Number(url.port) : 80 };
 }

@@ -69,7 +69,7 @@ function endpointOf(value, protocol) {
     || /[\x00-\x20\\]/.test(value) || url.username || url.password || url.search || url.hash
     || !url.pathname.endsWith(protocol === 'responses' ? '/responses' : protocol === 'anthropic-messages' ? '/v1/messages' : '/chat/completions') || /%/.test(url.pathname)
     || !['http:', 'https:'].includes(url.protocol)) invalid();
-  if (url.protocol === 'http:' && !['localhost', 'host.example.invalid', '[::1]', 'host.openshell.internal'].includes(url.hostname)) {
+  if (url.protocol === 'http:' && !['localhost', '127.0.0.1', '[::1]', 'host.openshell.internal'].includes(url.hostname)) {
     throw fail('ENDPOINT_INVALID', 'Model API HTTP endpoints must be loopback or host.openshell.internal; use HTTPS for hosted endpoints.');
   }
   return url;

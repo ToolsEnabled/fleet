@@ -13,9 +13,9 @@
  *
  *   model.js#resolveGpuPeerHost() resolves the Ollama host from
  *   config/machines.profile.json PEERS, and throws MODEL_NO_GPU_PEER_CONFIGURED
- *   when there are none. There is no 127' + '.0.0.1' + ' branch. Measured on this machine
+ *   when there are none. There is no 127.0.0.1 branch. Measured on this machine
  *   2026-08-12: probeLocalModel() returned the model list of a LAN peer -- a
- *   DIFFERENT COMPUTER -- while a fully loaded Ollama sat on 127' + '.0.0.1' + ':11434
+ *   DIFFERENT COMPUTER -- while a fully loaded Ollama sat on 127.0.0.1:11434
  *   with qwen2.5:7b-instruct in it, invisible to the entire stack.
  *   (The peer's address is deliberately not recorded here. This file publishes
  *   under MIT, and an operator's network topology is not ours to hand out.)
@@ -51,7 +51,7 @@ const http = require('node:http');
 const localOptions = require('../local-model-options');
 const { ensureGpu } = require('../ollama-gpu');
 
-const DEFAULT_HOST = '127' + '.0.0.1';
+const DEFAULT_HOST = '127.0.0.1';
 const MAX_RESPONSE_BYTES = 1024 * 1024;
 const DEFAULT_PROBE_TIMEOUT_MS = 4_000;
 const DEFAULT_COMPLETION_TIMEOUT_MS = 180_000;

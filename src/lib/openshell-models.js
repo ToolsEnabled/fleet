@@ -64,7 +64,7 @@ const ENV_KEY_RE = /^[A-Z][A-Z0-9_]{0,63}$/;
 const MAX_DISPLAY_NAME = 80;
 // Variables that are not a model key, or that belong to another provider.
 const FORBIDDEN_ENV_KEYS = /^(PATH|HOME|USER|SHELL|LANG|TERM|PWD|TMPDIR|CODEX_HOME|NODE_OPTIONS|NODE_EXTRA_CA_CERTS|SSL_CERT_FILE|OPENSHELL_.*|CODEX_AUTH_.*|TOOLSENABLED_.*)$/;
-const LOOPBACK_HOSTS = new Set(['127' + '.0.0.1', 'localhost', '[::1]', '::1']);
+const LOOPBACK_HOSTS = new Set(['127.0.0.1', 'localhost', '[::1]', '::1']);
 // Codex appends these to base_url itself; a base_url that already ends with
 // one is the most common mistake.
 const ROUTE_SUFFIX = /\/(responses|chat\/completions|completions|models)$/;
@@ -927,7 +927,7 @@ function modelCommand(argv, { env = process.env, stdout = process.stdout } = {})
     const connections = require('./openshell-model-connections');
     const connection = endpoint.envKey ? connections.validateConnection({ name: endpoint.name,
       transport: 'openai-chat', endpoint: endpoint.baseUrl.replace(/\/$/, '') + '/chat/completions', model: endpoint.model,
-      source: ['localhost', '127' + '.0.0.1', '[::1]', 'host.openshell.internal'].includes(new URL(endpoint.baseUrl).hostname) ? 'local' : 'api',
+      source: ['localhost', '127.0.0.1', '[::1]', 'host.openshell.internal'].includes(new URL(endpoint.baseUrl).hostname) ? 'local' : 'api',
       auth: 'openshell', tokenEnv: endpoint.envKey }, { env }) : null;
     if (connection) connections.readConnections({ env });
     const result = addModel({ name, baseUrl: args.baseUrl, model: args.model, envKey: args.envKey, displayName: args.displayName }, { env, makeDefault: args.makeDefault === true });

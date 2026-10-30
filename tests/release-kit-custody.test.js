@@ -8,7 +8,7 @@ const { readCodexCustody, createAccountService } = require('../src/lib/fleet-v3-
 const account = 'fixture-account';
 const model = 'fixture-model';
 const route = { provider: 'codex', account, admission: 'ordinary-work', model };
-const meta = { email: 'support@toolsenabled.ai', workspaceId: 'fixture-workspace', planType: 'fixture-plan', creditsAllowed: false };
+const meta = { email: 'fixture@example.invalid', workspaceId: 'fixture-workspace', planType: 'fixture-plan', creditsAllowed: false };
 const secret = 'fixture-access-only-secret';
 function fixture(t) {
   const base = path.resolve(__dirname, '../dist/release-kit/custody-tests');
@@ -127,8 +127,8 @@ for (const mode of [undefined, 'refused-exit']) test(`custody answered refusal p
 test('custody refusal reason redacts local, remote and credential-shaped values', async t => {
   const f = fixture(t);
   const githubFixtureToken = 'ghp_' + 'abcdefghijklmnopqrstuvwxyz12345';
-  f.respond({ status: 'refused', refresh_token: 'fixture-redacted',
-    reason: `Holder missing: ${secret}, fixture-id-secret, fixture-remote-secret; password=fixture-password; Bearer fixture-api-secret; password="fixture-redacted"; ${githubFixtureToken}; sk-fixturekey; eyJfixture.e30.signature` });
+  f.respond({ status: 'refused', refresh_token: 'fixture-remote-secret',
+    reason: `Holder missing: ${secret}, fixture-id-secret, fixture-remote-secret; password=fixture-password; Bearer fixture-api-secret; password="two words hidden"; ${githubFixtureToken}; sk-fixturekey; eyJfixture.e30.signature` });
   await assert.rejects(f.accounts.validate(route), error => {
     diagnostic('FLEET_ACCOUNT_CUSTODY_INVALID', 'ATTESTATION_REFUSED', /Holder missing: \[redacted\]/)(error);
     assert.doesNotMatch(error.message, /sk-fixturekey|eyJfixture|two words hidden/);

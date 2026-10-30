@@ -32,7 +32,7 @@ function hostPatternMatches(pattern, name = HOST_NAME) {
 
 function endpointReachesHost(endpoint) {
   if (!endpoint || typeof endpoint !== 'object') return null;
-  return ['host.openshell.internal', 'localhost', 'host.example.invalid', '[::1]', '::1']
+  return ['host.openshell.internal', 'localhost', '127.0.0.1', '[::1]', '::1']
     .some(name => hostPatternMatches(endpoint.host, name)) ? Object.freeze({ host: endpoint.host }) : null;
 }
 

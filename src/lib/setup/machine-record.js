@@ -58,7 +58,7 @@ const BRIDGE_PORT_RANGE = Object.freeze({ first: 4610, last: 4619 });
 // The bridge binds loopback and refuses anything else (BRIDGE_BIND_REFUSED). It
 // is recorded here so a generated file never has to guess it, not so it can be
 // changed -- a record naming a different host is refused below.
-const LOOPBACK_HOST = 'host.example.invalid';
+const LOOPBACK_HOST = '127.0.0.1';
 
 const MACHINE_ID_PATTERN = /^[a-z0-9][a-z0-9._-]{0,63}$/;
 const OPENSHELL_REGISTRATION_STATES = Object.freeze(['never', 'configured', 'unknown']);

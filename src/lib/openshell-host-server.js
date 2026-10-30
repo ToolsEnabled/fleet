@@ -8,7 +8,7 @@
 // that runs OpenShell instead, over MCP's streamable HTTP transport, so agents
 // reach them only as MCP calls to http://host.openshell.internal:<port>/mcp/<grant>.
 //
-// - Listens on host.example.invalid only. With OpenShell's Docker driver the sandbox's
+// - Listens on 127.0.0.1 only. With OpenShell's Docker driver the sandbox's
 //   traffic leaves through the supervisor, which reaches the host's loopback.
 // - Each grant (src/lib/openshell-host-grants.js) has its own path,
 //   /mcp/<grant id>, and its own bearer token, which only an OpenShell
@@ -166,7 +166,7 @@ function createHostServer({
   root,
   port = DEFAULT_PORT,
   served = OPENSHELL_HOST_TOOLS,
-  hostNames = ['host.openshell.internal', 'host.example.invalid', 'localhost'],
+  hostNames = ['host.openshell.internal', '127.0.0.1', 'localhost'],
   permissionSession,
   dispatcher,
   readGrants = () => grantsModule.readGrants(root, { served }),

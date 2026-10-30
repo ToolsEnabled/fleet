@@ -57,7 +57,7 @@ function phraseChanges(home = sandboxHome()) {
     { tool: 'memory.search', from: '; see its key channel-map-read-this-first', to: '' },
     { tool: 'search.index',
       from: 'into a local semantic vector store (incremental; only changed files are re-embedded). Embeddings use local Ollama when available, else a deterministic lexical fallback.',
-      to: 'for local search (incremental; only changed files are re-indexed). Embeddings use an Ollama server at 127' + '.0.0.1' + ':11434 inside this sandbox when one runs there (none does by default); otherwise search is lexical: it matches the words and characters in the files, not their meaning.' },
+      to: 'for local search (incremental; only changed files are re-indexed). Embeddings use an Ollama server at 127.0.0.1:11434 inside this sandbox when one runs there (none does by default); otherwise search is lexical: it matches the words and characters in the files, not their meaning.' },
     { tool: 'search.query', from: 'Semantically search the indexed files for a natural-language query',
       to: 'Search the indexed files for a query (lexical unless search.status reports Ollama embeddings: use words the files contain)' },
     { tool: 'search.status', from: 'Report the semantic index', to: 'Report the search index' },

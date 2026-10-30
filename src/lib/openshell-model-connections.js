@@ -61,7 +61,7 @@ function endpoint(value, transport, source) {
   // Reject IPv4 shorthand/normalization too: plain HTTP must be visibly local.
   const host = match[2].toLowerCase();
   if (parsed.hostname.toLowerCase() !== host || parsed.username || parsed.password || parsed.search || parsed.hash
-      || (parsed.protocol === 'http:' && !['localhost', 'host.example.invalid', '[::1]'].includes(host)
+      || (parsed.protocol === 'http:' && !['localhost', '127.0.0.1', '[::1]'].includes(host)
         && !(source === 'local' && host === 'host.openshell.internal'))) invalid();
   return parsed.href;
 }

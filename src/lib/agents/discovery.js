@@ -133,7 +133,7 @@ function getJson(url, timeoutMs) {
 
 async function discoverLocalModels({ env = process.env, endpoints = readEndpoints(), host = null, timeoutMs = LOCAL_TIMEOUT_MS } = {}) {
   const insideSandbox = require('../openshell-inside').isInsideOpenShellSandbox(env);
-  const where = host || (insideSandbox ? 'host.openshell.internal' : '127' + '.0.0.1');
+  const where = host || (insideSandbox ? 'host.openshell.internal' : '127.0.0.1');
   return Promise.all(endpoints.local.map(async row => {
     const base = `http://${where}:${row.port}`;
     const listing = await getJson(`${base}/v1/models`, timeoutMs);
