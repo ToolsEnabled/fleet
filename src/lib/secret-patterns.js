@@ -107,14 +107,19 @@ function redactCredentialPairs(text) {
  * Facebook token shape. The durable message store then refused every message
  * to or from that circle, for good, because its ids never change.
  *
- * A match is excused only when it lies wholly inside one of those two ids,
+ * A contract part is keyed `part-` plus the SHA-256 digest of its JSON value.
+ * Since that digest is also lower-case hex, a part key can have the same
+ * accidental EAA prefix. It is treated as a generated identifier by its exact
+ * product shape, like the existing tree and inbox ids.
+ *
+ * A match is excused only when it lies wholly inside one of those generated ids,
  * written exactly: lower-case hex of the exact length, with no letter, digit,
  * `_`, `-` or `.` on either side. Nothing a provider issues fits inside that:
  * the only pattern above that lower-case hex can satisfy is the EAA one. Every
  * other match in the same text is judged as before, so a token beside an id,
  * an id with anything added, `Bearer <id>`, and digest-looking text that is
  * not one of these ids are all still refused. */
-const GENERATED_IDENTIFIER_SOURCE = String.raw`(?<![A-Za-z0-9_.-])(?:direct\.[0-9a-f]{64}|tree-[0-9a-f]{24})(?![A-Za-z0-9_-])`;
+const GENERATED_IDENTIFIER_SOURCE = String.raw`(?<![A-Za-z0-9_.-])(?:direct\.[0-9a-f]{64}|tree-[0-9a-f]{24}|part-[0-9a-f]{64})(?![A-Za-z0-9_-])`;
 
 function plaintextCredentialOutsideGeneratedIds(text) {
   if (typeof text !== 'string') return false;

@@ -856,6 +856,60 @@ function createFleetV5Contracts({ store, control, capabilities, selector = selec
     }
   }
 
+  async function ruleAmendmentHistory(job, amendment) {
+    const expected = Object.entries(amendment.rules || {});
+    const current = job?.rules && typeof job.rules === 'object' ? job.rules : null;
+    if (!current || !expected.length) return null;
+    const currentMatches = new Set(expected.filter(([id, text]) => current[id]?.text === text && current[id]?.active !== false).map(([id]) => id));
+    if (currentMatches.size === expected.length) return { currentMatches, historyMatches: new Set(), historyRevision: null, currentRules: current };
+
+    // A later job-rule edit archives the rule value it replaced. Read every
+    // page at one retained history revision; current values alone cannot
+    // explain a superseded rule, and a newer control revision is not proof.
+    const entries = [];
+    let offset = 0, historyRevision = null, total = null;
+    do {
+      const page = await control.request({ action: 'history-read', kind: 'rules', id: job.id, offset, limit: 1000,
+        ...(historyRevision === null ? {} : { expectedHistoryRevision: historyRevision }) });
+      if (page?.kind !== 'rules' || page.id !== job.id || !Number.isSafeInteger(page.historyRevision)
+          || !page.page || page.page.offset !== offset || !Number.isSafeInteger(page.page.total)
+          || !Number.isSafeInteger(page.page.returned) || !Array.isArray(page.entries)
+          || page.page.returned !== page.entries.length || page.entries.length > 1000
+          || (historyRevision !== null && page.historyRevision !== historyRevision)
+          || (total !== null && page.page.total !== total)) return null;
+      if (historyRevision === null) { historyRevision = page.historyRevision; total = page.page.total; }
+      entries.push(...page.entries);
+      const next = page.page.nextOffset;
+      if (next === null) {
+        if (offset + page.entries.length !== total) return null;
+        break;
+      }
+      if (!Number.isSafeInteger(next) || next !== offset + page.entries.length || next <= offset) return null;
+      offset = next;
+    } while (true);
+
+    const intentAt = Date.parse(amendment.at);
+    if (!Number.isFinite(intentAt)) return null;
+    const historyMatches = new Set();
+    for (const [id, text] of expected) {
+      if (currentMatches.has(id)) continue;
+      const live = current[id];
+      if (!live || typeof live.text !== 'string') return null;
+      const found = entries.some(entry => entry?.id === id && entry.text === text && entry.active !== false
+        && Number.isFinite(Date.parse(entry.editedAt)) && Date.parse(entry.editedAt) > intentAt
+        && Number.isFinite(Date.parse(entry.retiredAt)) && Date.parse(entry.retiredAt) >= Date.parse(entry.editedAt));
+      if (!found) return null;
+      historyMatches.add(id);
+    }
+    // Rule state may change while the history pages are read. Re-read the
+    // native job and proceed only if its identity and rule projection stayed
+    // identical to the snapshot used above.
+    const confirmed = await control.request({ action: 'job-read', id: job.id, view: 'full' });
+    if (confirmed?.id !== job.id || confirmed.nodeId !== job.nodeId
+        || stable(confirmed.rules || {}) !== stable(current)) return null;
+    return { currentMatches, historyMatches, historyRevision, currentRules: confirmed.rules || {} };
+  }
+
   async function inspectOnce({ contractId, idempotencyKey } = {}) {
     if (typeof contractId !== 'string' && typeof idempotencyKey !== 'string') error('FLEET_V5_CONTRACT_SELECTOR_INVALID', 'contractId or idempotencyKey is required.');
     let stored;
@@ -951,7 +1005,26 @@ function createFleetV5Contracts({ store, control, capabilities, selector = selec
           const answered = record.asks.find(ask => ask.id === record.operation.askId);
           if (answered?.status === 'answered' && answered.answerDigest === record.operation.answerDigest)
             record.operation = { ...record.operation, status: 'reconciled', resumeAttempt: answered.resumeAttempt || null };
-        } else if (amendment && (!amendment.changesWork || items.some(item => item.text?.includes(amendment.marker)))
+        } else if (amendment && !amendment.changesWork && Object.keys(amendment.rules || {}).length) {
+          try {
+            const evidence = await ruleAmendmentHistory(job, amendment);
+            if (evidence) {
+              amendment.reconciliationEvidence = { source: evidence.historyMatches.size ? 'native-rule-history' : 'native-current-rules',
+                historyRevision: evidence.historyRevision,
+                currentRuleKeys: [...evidence.currentMatches].sort(), historyRuleKeys: [...evidence.historyMatches].sort() };
+              amendment.nextContract = { ...amendment.nextContract, rules: { ...(amendment.nextContract.rules || {}) } };
+              // Reflect later supported native rule updates in the contract's
+              // current projection; never restore superseded amendment text.
+              for (const id of evidence.historyMatches) {
+                const rule = evidence.currentRules[id];
+                if (rule.active === false) delete amendment.nextContract.rules[id];
+                else amendment.nextContract.rules[id] = rule.text;
+              }
+              record.operation = { kind: 'amend', status: 'reconciled', amendment };
+              record.intentRevision = record.revision + 1;
+            }
+          } catch { /* absent, stale, or incomplete native history leaves the operation unknown */ }
+        } else if (amendment?.changesWork && items.some(item => item.text?.includes(amendment.marker))
             && (!Object.keys(amendment.rules || {}).length || Object.entries(amendment.rules).every(([id, text]) => job.rules?.[id]?.text === text))) {
           record.operation = { kind: 'amend', status: 'reconciled', amendment };
           record.intentRevision = record.revision + 1;
@@ -964,6 +1037,7 @@ function createFleetV5Contracts({ store, control, capabilities, selector = selec
             ? items.find(item => typeof item.text === 'string' && item.text.includes(amendment.marker))?.n : undefined;
           record.amendments = [...(record.amendments || []), { revision: amendment.revision, marker: amendment.marker,
             patch: amendment.patch, appendedWork: amendment.changesWork,
+            ...(amendment.reconciliationEvidence ? { reconciliationEvidence: structuredClone(amendment.reconciliationEvidence) } : {}),
             ...(Number.isSafeInteger(workItemN) ? { workItemN } : {}),
             ...(Array.isArray(amendment.resolvedWorkItems) ? { resolvedWorkItems: amendment.resolvedWorkItems,
               resolvedNativeItems: amendment.resolvedNativeItems } : {}), at: amendment.at }];
